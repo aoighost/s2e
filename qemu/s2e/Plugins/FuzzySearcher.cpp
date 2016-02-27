@@ -62,12 +62,12 @@ void FuzzySearcher::initialize() {
 	bool ok = false;
 	std::string cfgkey = getConfigKey();
 	//afl related
-	m_aflOutputpool = s2e()->getConfig()->getString(cfgkey + ".aflOutput", "", &ok); // AFL的输出目录
+	m_aflOutputpool = s2e()->getConfig()->getString(cfgkey + ".aflOutput", "", &ok); // AFL的输出目录 AFL output directory
 	if(!ok){
 		s2e()->getDebugStream() << "FuzzySearcher: You should specify AFL's output directory as aflOutputpool\n";
 		exit(0);
 	}
-	m_aflRoot = s2e()->getConfig()->getString(cfgkey + ".aflRoot", "", &ok); // AFL的根目录
+	m_aflRoot = s2e()->getConfig()->getString(cfgkey + ".aflRoot", "", &ok); // AFL的根目录 AFL root directory
 	if(!ok){
 		s2e()->getDebugStream() << "FuzzySearcher: You should specify AFL's root directory as aflRoot\n";
 		exit(0);
@@ -149,15 +149,15 @@ void FuzzySearcher::initialize() {
 
 klee::ExecutionState& FuzzySearcher::selectState() {
 	klee::ExecutionState *state;
-	if(!m_speculativeStates.empty()){ //为了更大化随机，优先选取未决状态
+	if(!m_speculativeStates.empty()){ //为了更大化随机，优先选取未决状态 For more randomly oriented, prefers the pending state
 		States::iterator it = m_speculativeStates.begin();
-		int random_index = rand() %  m_speculativeStates.size(); //尝试一次随机化
+		int random_index = rand() %  m_speculativeStates.size(); //尝试一次随机化 Try a randomized
 		while(random_index){
 			it++;
 			random_index--;
 		}
 		state = *it;
-		if (state->m_is_carry_on_state) { //随机查找失败
+		if (state->m_is_carry_on_state) { //随机查找失败 Random lookup failed
 			if (m_speculativeStates.size() > 1) {
 				++it;
 				if(it == m_speculativeStates.end()){
@@ -233,7 +233,7 @@ klee::ExecutionState& FuzzySearcher::selectState() {
 		}
 	}
 	*/
-	if(state->m_silently_concretized){ //如果在silently concretized状态中，则重新选择一个状态，并结束该状态
+	if(state->m_silently_concretized){ //如果在silently concretized状态中，则重新选择一个状态，并结束该状态 If silently concretizing state, then re-select a state and ending the state
 		s2e()->getDebugStream() << "FuzzySearcher: we are in a silently concretized state\n";
 		if(m_normalStates.find(state) != m_normalStates.end()){
 			m_normalStates.erase(state);
@@ -323,19 +323,19 @@ void FuzzySearcher::ProcessFirstInstruction(S2EExecutionState* state,
 void FuzzySearcher::onStateSwitchEnd(S2EExecutionState *currentState,
 		S2EExecutionState *nextState) {
 	s2e()->getDebugStream() << "FuzzySearcher: Capture state switch end event, give a chance to handle it.\n";
-	// 状态切换完成，结束之前状态，并生成测试用例
+	// 状态切换完成，结束之前状态，并生成测试用例 State switch is complete, before the end of the state, and to generate test cases
 	if(currentState && !(currentState->m_is_carry_on_state)){
 		s2e()->getExecutor()->terminateStateEarly(*currentState, "FuzzySearcher: terminate this for fuzzing");
 	}
 	if(currentState && (currentState->m_silently_concretized)){
 		//s2e()->getExecutor()->terminateStateEarly(*currentState, "FuzzySearcher: terminate silently concretized state");
 	}
-	// 后备状态都被选中了，说明只有一个状态了，可以准备下一个被选状态了。
+	// 后备状态都被选中了，说明只有一个状态了，可以准备下一个被选状态了。 Standby state are selected, indicating only one state, you can prepare the next state is selected.
 	if (nextState && nextState->m_is_carry_on_state) {
 #ifdef DEBUG
 		s2e()->getDebugStream() << "FuzzySearcher: We only have the seed state, now fetching new testcase.\n";
 #endif
-		//在新的一轮开始之前，这里由于AFL已经启动了，所以S2E首先先将AFL/output/queue中的目录拷贝至S2E获取输入的位置，即m_inicasepool
+		//在新的一轮开始之前，这里由于AFL已经启动了，所以S2E首先先将AFL/output/queue中的目录拷贝至S2E获取输入的位置，即m_inicasepool Before beginning a new round here since the AFL has been launched, so S2E first copy of the first AFL / output / queue in the directory to get S2E position input, that m_inicasepool
 		assert(m_AFLStarted && "AFL has not started, why?");
 		{
 			std::stringstream ssAflQueue;
@@ -398,7 +398,7 @@ void FuzzySearcher::onStateKill(S2EExecutionState *currentState) {
 	 * AFLROOT=/home/epeius/work/afl-1.96b
 	 * $AFLROOT/afl-fuzz -m 4096M -t 50000 -i /home/epeius/work/DSlab.EPFL/FinalTest/evincetest/seeds/ -o /home/epeius/work/DSlab.EPFL/FinalTest/evincetest/res/ -Q /usr/bin/evince @@
 	 */
-	if(!m_AFLStarted){//如果AFL还未启动，则启动AFL
+	if(!m_AFLStarted){//如果AFL还未启动，则启动AFL If the AFL has not started, start AFL
 		std::stringstream aflCmdline;
 		std::string generated_dir =  s2e()->getOutputDirectory() + "/testcases";
 		aflCmdline << m_aflRoot << "afl-fuzz -m 4096M -t 5000 -i " << generated_dir << " -o " << m_aflOutputpool <<
@@ -406,7 +406,7 @@ void FuzzySearcher::onStateKill(S2EExecutionState *currentState) {
 #ifdef DEBUG
 		s2e()->getDebugStream() << "FuzzySearcher: AFL command line is: " << aflCmdline.str() << "\n";
 #endif
-		system(aflCmdline.str().c_str()); //FIXME:阻塞??:
+		system(aflCmdline.str().c_str()); //FIXME:阻塞??: FIXME: blocking ??:
 		m_AFLStarted = true;
 	}
 }
@@ -448,13 +448,13 @@ klee::Executor::StatePair FuzzySearcher::prepareNextState(
 
 	m_current_conditon++;
 
-	if(m_loops >= m_MAXLOOPs){//已达到最大次数限制，结束S2E和AFL
+	if(m_loops >= m_MAXLOOPs){//已达到最大次数限制，结束S2E和AFL It has reached the maximum limit for the end of S2E and AFL
 #ifdef DEBUG
 		s2e()->getDebugStream() << "FuzzySearcher: Ready to exit\n";
 #endif
 		try{
 			char cmd[] = "pgrep -l afl-fuzz";
-			FILE *pp = popen(cmd, "r"); //建立管道
+			FILE *pp = popen(cmd, "r"); //建立管道 Build pipeline
 			if (!pp) {
 				s2e()->getDebugStream() << "FuzzySearcher: Cannot open the pipe to read\n";
 				exit(0);
@@ -479,7 +479,7 @@ klee::Executor::StatePair FuzzySearcher::prepareNextState(
 #ifdef DEBUG
 		s2e()->getDebugStream() << "FuzzySearcher: Reach the maxmium iteration, quitting...\n";
 #endif
-		//由于给AFL发送了KILL
+		//由于给AFL发送了KILL Due to the AFL sent a KILL
 		qemu_system_shutdown_request();
 		return sp;
 	}
@@ -526,7 +526,7 @@ void FuzzySearcher::onTimer() {
 
 }
 /**
- * Fetch新的测试用例
+ * Fetch新的测试用例 Fetch new test case
  */
 S2EExecutionState* FuzzySearcher::getNewCaseFromPool(S2EExecutionState* instate) {
 	bool done = false;
@@ -534,7 +534,7 @@ S2EExecutionState* FuzzySearcher::getNewCaseFromPool(S2EExecutionState* instate)
 	while (!done) {
 		sleep(1);
 		idlecounter ++;
-		//收集用例数量
+		//收集用例数量 The number of cases was collected by
 		std::vector<std::string> taskfiles;
 		int taskcount = FileUtil::count_file(this->m_inicasepool.c_str(),
 				taskfiles);

@@ -26,6 +26,7 @@ namespace plugins {
 class FuzzySearcher;
 /**
  * 实现对指定函数的指定参数的符号化功能
+ * To achieve the specified parameters of the specified function of the symbolic function
  */
 class FuzzySearcherState: public PluginState
 {
@@ -34,7 +35,8 @@ private:
     S2EExecutionState *m_state;
 public:
     //为了提高效率，可以考虑将当前执行的分支写入到AFL的位图中
-    uint64_t m_prev_loc;//存放上一条执行的分支(NOTE: 执行时)
+		// To improve efficiency, consider writing to the Executive branch of the current AFL bitmaps
+    uint64_t m_prev_loc;//存放上一条执行的分支(NOTE: 执行时) Stored on a branch execution (NOTE: when performing)
     FuzzySearcherState();
     FuzzySearcherState(S2EExecutionState *s, Plugin *p);
     virtual ~FuzzySearcherState();
@@ -98,31 +100,31 @@ public:
 	static bool copyfile(const char* fromfile, const char* tofile);
 private:
 	/**
-	 * 用例调度相关
+	 * 用例调度相关 S2E get input position with scheduling related cases
 	 */
-	std::string m_inicasepool;//S2E获取输入的位置
-	std::string m_curcasepool;//当前S2E的具体输入
+	std::string m_inicasepool;//S2E获取输入的位置 S2E obtain the location entered.
+	std::string m_curcasepool;//当前S2E的具体输入 Specific input current S2E
 
 	// AFL related
-	std::string m_aflOutputpool;//AFL的输出目录
-	std::string m_aflRoot;//AFL的根目录
+	std::string m_aflOutputpool;//AFL的输出目录 AFL output directory
+	std::string m_aflRoot;//AFL的根目录 AFL root directory
 	bool m_aflBinaryMode;//AFL是否为binary mode
-	bool m_AFLStarted;//AFL是否已经启动
-	std::string m_aflAppArgs;//目标软件的启动命令，并将文件位置替换为@@
-	int m_aflPid;//AFL的进程号
-	unsigned char* m_aflBitmapSHM;//AFL的位图(共享内存的形式)
-	bool m_findBitMapSHM;//是否已经发现AFL位图
+	bool m_AFLStarted;//AFL是否已经启动 Whether AFL has started
+	std::string m_aflAppArgs;//目标软件的启动命令，并将文件位置替换为@@ Target software startup command file location and replace @@
+	int m_aflPid;//AFL的进程号 AFL's process ID
+	unsigned char* m_aflBitmapSHM;//AFL的位图(共享内存的形式) AFL bitmap (in the form of shared memory)
+	bool m_findBitMapSHM;//是否已经发现AFL位图 Whether it has been found AFL bitmap
 	// AFL end
 
-	std::string m_symbolicfilename;//S2E执行过程中输入的名称(唯一)
+	std::string m_symbolicfilename;//S2E执行过程中输入的名称(唯一) Name execution S2E entered (unique)
 
 	std::string m_hostfilebase;
-	std::string m_mainModule;//用户配置的主模块名称
+	std::string m_mainModule;//用户配置的主模块名称 Master module name of the user configuration
 
 	int m_idlecondition;
 
-	int m_loops;//当前S2E迭代的轮数
-	int m_MAXLOOPs;//用户配置最大迭代次数，当达到该次数时，结束S2E和AFL
+	int m_loops;//当前S2E迭代的轮数 The current iteration rounds S2E
+	int m_MAXLOOPs;//用户配置最大迭代次数，当达到该次数时，结束S2E和AFL Users configure the maximum number of iterations, the number of times when it reaches the end of S2E and AFL
 
 
 public:
